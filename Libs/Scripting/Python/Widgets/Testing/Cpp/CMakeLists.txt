@@ -2,6 +2,7 @@ set(KIT ${PROJECT_NAME})
 
 create_test_sourcelist(Tests ${KIT}CppTests.cpp
   ctkPythonConsoleTest1.cpp
+  ctkPythonConsoleTest2.cpp
   #EXTRA_INCLUDE TestingMacros.h
   )
 
@@ -18,3 +19,4 @@ target_link_libraries(${KIT}CppTests ${LIBRARY_NAME} ${CTK_BASE_LIBRARIES})
 #
 
 SIMPLE_TEST( ctkPythonConsoleTest1 )
+SIMPLE_TEST( ctkPythonConsoleTest2 )

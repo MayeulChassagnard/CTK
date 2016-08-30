@@ -21,6 +21,7 @@ set(TEST_SOURCES
   ctkColorPickerButtonTest1.cpp
   ctkComboBoxTest1.cpp
   ctkCompleterTest1.cpp
+  ctkCompleterTest2.cpp
   ctkConsoleTest.cpp
   ctkConsoleTest1.cpp
   ctkCoordinatesWidgetTest.cpp
@@ -281,6 +282,7 @@ SIMPLE_TEST( ctkColorDialogTest2 )
 SIMPLE_TEST( ctkColorPickerButtonTest1 )
 SIMPLE_TEST( ctkComboBoxTest1 )
 SIMPLE_TEST( ctkCompleterTest1 )
+SIMPLE_TEST( ctkCompleterTest2 )
 SIMPLE_TEST( ctkConsoleTest )
 SIMPLE_TEST( ctkConsoleTest1 )
 SIMPLE_TEST( ctkCoordinatesWidgetTest )
