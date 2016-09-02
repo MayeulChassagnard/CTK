@@ -306,9 +306,11 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     compareText = compareText.mid(dot+1);
     }
 
+  QString module = "__main__";
+  /*
   qDebug() << "lookup" << lookup;
   // Split the lookup to complete the module at the last dot, if one exists
-  QString module = "__main__";
+
   dot = lookup.lastIndexOf('.');
   if (dot != -1)
     {
@@ -316,7 +318,7 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     module.append(lookup.mid(0, dot));
     lookup = lookup.mid(dot+1);
     }
-
+  */
   qDebug() << "module" << module;
   qDebug() << "lookup" << lookup;
   qDebug() << "compareText" << compareText;
@@ -326,10 +328,11 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
   if (!lookup.isEmpty() || !compareText.isEmpty())
     {
     attrs = this->PythonManager.pythonAttributes(lookup, module.toLatin1(), appendParenthesis);
-    module.remove(0,8);
-    qDebug() << "module" << module;
-    module.prepend("__main__.__builtins__");
-    qDebug() << "module" << module;
+    //module.remove(0,8);
+    //qDebug() << "module" << module;
+    //module.prepend("__main__.__builtins__");
+    module = "__main__.__builtins__";
+    //qDebug() << "module" << module;
     attrs << this->PythonManager.pythonAttributes(lookup, module.toLatin1(),
                                                   appendParenthesis);
     attrs.removeDuplicates();

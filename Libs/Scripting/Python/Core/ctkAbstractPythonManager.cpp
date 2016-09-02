@@ -385,20 +385,26 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
   PyObject* dict = PyImport_GetModuleDict();
 
   // Split module by '.' and retrieve the object associated if the last module
-  QString precedingModule = module;
-  PyObject* object = ctkAbstractPythonManager::pythonModule(precedingModule);
+  //QString precedingModule = module;
+  PyObject* object = 0; //= ctkAbstractPythonManager::pythonModule(precedingModule);
   PyObject* prevObject = 0;
   QStringList moduleList = module.split(".", QString::SkipEmptyParts);
   foreach(const QString& module, moduleList)
     {
+    qDebug() << "module:" << module << "with DICT:" << dict << PyDict_Check(dict);
     object = PyDict_GetItemString(dict, module.toLatin1().data());
     if (prevObject) { Py_DECREF(prevObject); }
     if (!object)
       {
+      qDebug() << "object is NULL";
       break;
       }
     Py_INCREF(object);
+    //PyObject* mPythonName = PyString_FromString(module.toLatin1().data());
+    //object = PyImport_Import(mPythonName);
+    qDebug() << "object is" << object;
     dict = PyModule_GetDict(object);
+    qDebug() << "is " << module << " a Dict ? -" << PyDict_Check(dict);
     prevObject = object;
     }
   if (!object)
@@ -421,16 +427,24 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
     QStringList tmpNames = pythonVariableName.split('.');
     for (int i = 0; i < tmpNames.size() && object; ++i)
       {
-      qDebug() << "tmpNames[" << i << "]" << tmpNames[i];
+      QByteArray tmpName = tmpNames.at(i).toLatin1();
+      qDebug() << "tmpNames[" << i << "]" << tmpName.data();
       bool classInstantiated = false;
-      PythonQtObjectPtr self;
-      if (tmpNames[i].contains("()"))
+
+      if (tmpName.contains("()"))
         {
+        PythonQtObjectPtr self;
         tmpNames[i].remove("()");
-        qDebug() << "tmpNames ["<<i<<"]" << tmpNames[i];
+        tmpName = tmpNames.at(i).toLatin1();
+        qDebug() << "inside tmpNames ["<<i<<"]" << tmpName.data();
 
         // Attempt to instantiate the associated python class
-        PyObject* classToInstantiate = PyDict_GetItemString(dict, tmpNames[i].toLatin1().data());
+        qDebug() << dict << "-- IS DICT? --" << PyDict_Check(dict);
+        PyObject* classToInstantiate; // = PyDict_GetItemString(dict, tmpName.data());
+        if (PyDict_Check(dict))
+          classToInstantiate = PyDict_GetItemString(dict, tmpName.data());
+        else
+          classToInstantiate = PyObject_GetAttrString(object, tmpName.data());
         PyObject * arguments = PyTuple_New(0);
         qDebug() << "classToInstantiate" << classToInstantiate;
 
@@ -456,7 +470,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
           qDebug() << "self.object()" << self.object();
           if (!PyObject_HasAttrString(self.object(), "bar_instance_member"))
             {
-            qWarning() << "[ERROR] Instantiated object" << tmpNames[i] << classToInstantiate << " - Failed to lookup 'bar_instance_member'";
+            qWarning() << "[ERROR] Instantiated object" << tmpName.data() << classToInstantiate << " - Failed to lookup 'bar_instance_member'";
             }
           else
             {
@@ -476,7 +490,6 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
           }
         }
 
-      QByteArray tmpName = tmpNames.at(i).toLatin1();
       PyObject* prevObj = object;
       if (PyDict_Check(object))
         {
@@ -488,6 +501,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
         {
         qDebug() << "else object" << object;
         object = PyObject_GetAttrString(object, tmpName.data());
+        dict = object;
         qDebug() << "--> object" << object << "--> name" << tmpName.data();
         }
       Py_DECREF(prevObj);
