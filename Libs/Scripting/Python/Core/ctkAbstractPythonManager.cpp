@@ -451,6 +451,9 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
         //dict = classToInstantiate;
         PyObject * arguments = PyTuple_New(0);
         qDebug() << "classToInstantiate" << classToInstantiate;
+        qDebug() << "TP_CALL #classToInstantiate" << classToInstantiate->ob_type->tp_call;
+        qDebug() << "TYPE    #classToInstantiate" << classToInstantiate->ob_type;
+        qDebug() << "PRINT   #classToInstantiate" << classToInstantiate->ob_type->tp_print;
 
         if (classToInstantiate)
           {
@@ -459,24 +462,24 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
             // New style class
             qDebug() << "PyTypeCheck" << classToInstantiate;
             self.setNewRef(PyObject_Call(classToInstantiate, arguments, 0));
-            qDebug() << "TP_CALL" << self.object()->ob_type->tp_call;
+            qDebug() << "TP_CALL #self.object()" << self.object()->ob_type->tp_call;
             //object = classToInstantiate;
             }
           else
             {
             qDebug() << "PyInstanceNew" << classToInstantiate;
-            self.setNewRef(PyObject_Call(classToInstantiate, arguments, 0));
-            //self.setNewRef(PyInstance_New(classToInstantiate, arguments, 0));
+            //self.setNewRef(PyObject_Call(classToInstantiate, arguments, 0));
+            self.setNewRef(PyInstance_New(classToInstantiate, arguments, 0));
             //self.setNewRef(PyObject_CallFunctionObjArgs(classToInstantiate,NULL));
             }
           Py_DECREF(arguments);
 
+          qDebug() << "self.object()" << self.object();
           if (!self)
             {
             qDebug() << "[ERROR] Failed to instantiate" << classToInstantiate;
             }
-          qDebug() << "self.object()" << self.object();
-          if(tmpNames[i].compare("instantiate_bar") == 0)
+          if(tmpNames[i].compare("instantiate_bar") == 0 && self.object())
             {
             if (!PyObject_HasAttrString(self.object(), "bar_instance_member"))
               {
@@ -493,7 +496,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
           //object = PyInstance_New(self.object(), arguments, 0);
           //qDebug() << "object" << object;
 
-          //qDebug() << "attr of the Instaiated class:" << results;
+          qDebug() << "attr of the Instaiated class:" << results;
           }
         }
       else

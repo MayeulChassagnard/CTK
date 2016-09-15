@@ -54,7 +54,8 @@ private Q_SLOTS:
   void testExecuteFile();
   void testExecuteFile_data();
 
-  //void testPythonAttributes(); // TODO
+  void testPythonAttributes(); // TODO
+  void testPythonAttributes_data();
 
   void testPythonModule();
   void testPythonModule_data();
@@ -268,6 +269,92 @@ void ctkAbstractPythonManagerTester::testExecuteFile_data()
 
   QTest::newRow("3-check __file__ attribute") << QString("print 'This file is: %s' % __file__")
                      << false;
+}
+
+// ----------------------------------------------------------------------------
+void ctkAbstractPythonManagerTester::testPythonAttributes()
+{
+  QFETCH(QString, pythonVariableName);
+  QFETCH(QString, expectedAttributeList);
+
+  //this->PythonManager.executeFile("../../CTK/Libs/Scripting/Python/Core/Testing/Cpp/4236-test.py");
+
+  QStringList code = QStringList()
+      << "class Bar(object):"
+      << "  BAR_CLASS_MEMBER = 1"
+      << "    def __init__(self):"
+      << "      self.bar_instance_member = 1"
+      << "    def bar_instance_method(self):"
+      << QString("      print('Hello from instance method')")
+      << "    @staticmethod"
+      << "    def bar_class_method():"
+      << QString("      print('Hello from class method')")
+
+      << "class Foo(object):"
+      << "  FOO_CLASS_MEMBER = 1"
+      << "  def __init__(self):"
+      << "    self.foo_instance_member = 1"
+      << "  def foo_instance_method(self):"
+      << QString("    print('Hello from instance method')")
+      << "  def instantiate_bar(self):"
+      << "    return Bar()"
+      << "  @staticmethod"
+      << "  def foo_class_method():"
+      << QString("    print('Hello from class method')")
+
+      << "f = Foo()"
+      << "class Object(object): pass"
+      << "d = Object()"
+      << QString("setattr(d, 'foo_class', Foo)");
+
+  this->PythonManager.executeString(code.join("\n"));
+
+  //qDebug() << code.join("\n");
+  QStringList AttributeList = this->PythonManager.pythonAttributes(pythonVariableName, QString("__main__").toLatin1(), false);
+  qDebug() << "\nexpectedAttributeList" << expectedAttributeList << "\nAttributeList" << AttributeList;
+  QVERIFY(AttributeList.contains(expectedAttributeList));
+
+  //PyObject* expectedAttr = PyObject_Dir(pythonVariableName);
+
+  //foreach (const QString& expectedAttribute, expectedAttributeList)
+    //QVERIFY(AttributeList.contains(expectedAttribute));
+
+  //QCOMPARE(AttributeList, expectedAttributeList);
+}
+
+// ----------------------------------------------------------------------------
+void ctkAbstractPythonManagerTester::testPythonAttributes_data()
+{
+  QTest::addColumn<QString>("pythonVariableName");
+  QTest::addColumn<QString>("expectedAttributeList");
+
+  QTest::newRow("0") << "d.foo_class()"
+                     << "FOO_CLASS_MEMBER";
+
+/*                   << 'FOO_CLASS_MEMBER',
+                        '__class__',
+                        '__delattr__',
+                        '__dict__',
+                        '__doc__',
+                        '__format__',
+                        '__getattribute__',
+                        '__hash__',
+                        '__init__',
+                        '__module__',
+                        '__new__',
+                        '__reduce__',
+                        '__reduce_ex__',
+                        '__repr__',
+                        '__setattr__',
+                        '__sizeof__',
+                        '__str__',
+                        '__subclasshook__',
+                        '__weakref__',
+                        'foo_class_method',
+                        'foo_instance_member',
+                        'foo_instance_method',
+                        'instantiate_bar';
+*/
 }
 
 // ----------------------------------------------------------------------------
