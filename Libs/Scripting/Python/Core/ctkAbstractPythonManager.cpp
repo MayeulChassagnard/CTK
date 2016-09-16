@@ -385,13 +385,12 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
   PyObject* dict = PyImport_GetModuleDict();
 
   // Split module by '.' and retrieve the object associated if the last module
-  //QString precedingModule = module;
   PyObject* object = 0; //= ctkAbstractPythonManager::pythonModule(precedingModule);
   PyObject* prevObject = 0;
   QStringList moduleList = module.split(".", QString::SkipEmptyParts);
+
   foreach(const QString& module, moduleList)
     {
-    //qDebug() << "module:" << module << "with DICT:" << dict << PyDict_Check(dict);
     object = PyDict_GetItemString(dict, module.toLatin1().data());
     if (prevObject) { Py_DECREF(prevObject); }
     if (!object)
@@ -400,11 +399,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
       break;
       }
     Py_INCREF(object);
-    //PyObject* mPythonName = PyString_FromString(module.toLatin1().data());
-    //object = PyImport_Import(mPythonName);
-    //qDebug() << "object is" << object;
     dict = PyModule_GetDict(object);
-    //qDebug() << "is " << module << " a Dict ? -" << PyDict_Check(dict);
     prevObject = object;
     }
   if (!object)
@@ -420,7 +415,11 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
 //    }
 //  Py_INCREF(object);
 
+  PyObject* main_object = object;
+  QString instantiated_class_name = "something_random_djfdfkjnkvfjndsvfhgf";
   QStringList results;
+  QString line_code="";
+
   if(pythonVariableName.isEmpty())
     results = dir_object(object,appendParenthesis);
 
@@ -430,70 +429,40 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
     QStringList tmpNames = pythonVariableName.split('.');
     for (int i = 0; i < tmpNames.size() && object; ++i)
       {
+      line_code.append(tmpNames[i]);
+      line_code.append(".");
+
       QByteArray tmpName = tmpNames.at(i).toLatin1();
       qDebug() << "tmpNames[" << i << "]" << tmpName.data();
-      //bool classInstantiated = false;
 
       if (tmpName.contains("()"))
         {
-        PythonQtObjectPtr self;
         tmpNames[i].remove("()");
         tmpName = tmpNames.at(i).toLatin1();
         qDebug() << "inside tmpNames ["<<i<<"]" << tmpName.data();
 
         // Attempt to instantiate the associated python class
         qDebug() << dict << "-- IS DICT? --" << PyDict_Check(dict);
-        PyObject* classToInstantiate; // = PyDict_GetItemString(dict, tmpName.data());
+        PyObject* classToInstantiate;
         if (PyDict_Check(dict))
           classToInstantiate = PyDict_GetItemString(dict, tmpName.data());
         else
           classToInstantiate = PyObject_GetAttrString(object, tmpName.data());
-        //dict = classToInstantiate;
-        PyObject * arguments = PyTuple_New(0);
         qDebug() << "classToInstantiate" << classToInstantiate;
 
         if (classToInstantiate)
           {
-          if (PyType_Check(classToInstantiate))
-            {
-            // New style class
-            qDebug() << "PyTypeCheck" << classToInstantiate;
-            self.setNewRef(PyObject_Call(classToInstantiate, arguments, 0));
-            qDebug() << "TP_CALL" << self.object()->ob_type->tp_call;
-            //object = classToInstantiate;
-            }
-          else
-            {
-            qDebug() << "PyInstanceNew" << classToInstantiate;
-            self.setNewRef(PyObject_Call(classToInstantiate, arguments, 0));
-            //self.setNewRef(PyInstance_New(classToInstantiate, arguments, 0));
-            //self.setNewRef(PyObject_CallFunctionObjArgs(classToInstantiate,NULL));
-            }
-          Py_DECREF(arguments);
+          QString code = " = ";
+          code.prepend(instantiated_class_name);
+          line_code.remove(line_code.lastIndexOf('.'),1);
+          code.append(line_code);
 
-          if (!self)
-            {
-            qDebug() << "[ERROR] Failed to instantiate" << classToInstantiate;
-            }
-          qDebug() << "self.object()" << self.object();
-          if(tmpNames[i].compare("instantiate_bar") == 0)
-            {
-            if (!PyObject_HasAttrString(self.object(), "bar_instance_member"))
-              {
-              qDebug() << "[ERROR] Instantiated object" << tmpName.data() << classToInstantiate << " - Failed to lookup 'bar_instance_member'";
-              }
-            else
-              {
-              qDebug() << "[OK] Successfull lookup 'bar_instance_member' on " << tmpName.data() << classToInstantiate << "instance";
-              }
-            }
-          object = self.object();
-          //dict = object;
-          results = dir_object(self.object(),appendParenthesis);
-          //object = PyInstance_New(self.object(), arguments, 0);
-          //qDebug() << "object" << object;
+          PyRun_SimpleString(code.toLatin1().data());
+          line_code.append('.');
+          object = PyObject_GetAttrString(main_object,instantiated_class_name.toLatin1().data());
 
-          //qDebug() << "attr of the Instaiated class:" << results;
+          dict = object;
+          results = dir_object(object,appendParenthesis);
           }
         }
       else
@@ -503,14 +472,13 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
           {
           qDebug() << "PyDict_Check object" << object;
           object = PyDict_GetItemString(object, tmpName.data());
-          //dict = PyModule_GetDict(object);
           Py_XINCREF(object);
           }
         else
           {
           qDebug() << "else object" << object;
           object = PyObject_GetAttrString(object, tmpName.data());
-          dict = object; //dict = PyModule_GetDict(object);
+          dict = object;
           qDebug() << "--> object" << object << "--> name" << tmpName.data();
           }
         Py_DECREF(prevObj);
@@ -522,10 +490,15 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
       }
     PyErr_Clear();
     }
+
   if (object)
     {
     Py_DECREF(object);
     }
+
+  if (PyObject_HasAttrString(main_object,instantiated_class_name.toLatin1().data()))
+    PyObject_DelAttrString(main_object,instantiated_class_name.toLatin1().data());
+
   return results;
 }
 
