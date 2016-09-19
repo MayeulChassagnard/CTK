@@ -753,14 +753,28 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
   else
     {
     //can't more autocomplete when there is "()"
-    tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-    if (tc.selectedText()=="()")
+    //tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+    if (tc.selectedText()==")" || tc.selectedText()=="(")
       return;
 
+    qDebug() << "\n\n SELECTED TEXT" << tc.selectedText() << "\n\n";
     tc = this->textCursor();
     tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor);
     tc.movePosition(QTextCursor::StartOfWord, QTextCursor::MoveAnchor);
     tc.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
+    /*
+     * Get what there is after the word selected.
+     * IF there is a parenthesis
+     * THEN bool appendParenthesis should be false
+     *
+     * QTextCursor parenthesis = this->textCursor();
+     * parenthesis.setPosition(tc.position());
+     * parenthesis.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+     * if (parenthesis.selectedText()=="(")
+     *   appendParenthesis = false;
+     *
+     */
+    qDebug() << "\n\n SELECTED WORD" << tc.selectedText() << "\n\n";
     tc.insertText(completion);
     endOfCompletion.setPosition(tc.position());
     this->setTextCursor(tc);

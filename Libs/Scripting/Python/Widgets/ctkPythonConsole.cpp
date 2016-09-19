@@ -277,17 +277,27 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
 
   bool appendParenthesis = true;
 
+  int numeberOfParenthesisClosed = 0;
   // Search backward through the string for usable characters
   QString textToComplete;
   for (int i = completion.length()-1; i >= 0; --i)
     {
     QChar c = completion.at(i);
     if (c.isLetterOrNumber() || c == '.' || c == '_' || c == '(' || c == ')')
-      {/*
-      if (c == '(' || c == ')')
+      {
+      if (c == '(')
         {
-        appendParenthesis = false;
-        }*/
+        if (numeberOfParenthesisClosed>0)
+          {
+          numeberOfParenthesisClosed--;
+          }
+        else
+          break; // stop to prepend
+        }
+      if (c == ')')
+        {
+        numeberOfParenthesisClosed++;
+        }
       textToComplete.prepend(c);
       }
     else
@@ -307,18 +317,6 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     }
 
   QString module = "__main__";
-  /*
-  qDebug() << "lookup" << lookup;
-  // Split the lookup to complete the module at the last dot, if one exists
-
-  dot = lookup.lastIndexOf('.');
-  if (dot != -1)
-    {
-    module.append('.');
-    module.append(lookup.mid(0, dot));
-    lookup = lookup.mid(dot+1);
-    }
-  */
   qDebug() << "module" << module;
   qDebug() << "lookup" << lookup;
   qDebug() << "compareText" << compareText;
@@ -328,11 +326,7 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
   if (!lookup.isEmpty() || !compareText.isEmpty())
     {
     attrs = this->PythonManager.pythonAttributes(lookup, module.toLatin1(), appendParenthesis);
-    //module.remove(0,8);
-    //qDebug() << "module" << module;
-    //module.prepend("__main__.__builtins__");
     module = "__main__.__builtins__";
-    //qDebug() << "module" << module;
     attrs << this->PythonManager.pythonAttributes(lookup, module.toLatin1(),
                                                   appendParenthesis);
     attrs.removeDuplicates();
@@ -348,7 +342,6 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     this->setCaseSensitivity(Qt::CaseInsensitive);
     this->setCompletionPrefix(compareText.toLower());
 
-    //qDebug() << "completion" << completion;
     // If a dot as been entered and if an item of possible
     // choices matches one of the preference list, it will be selected.
     QModelIndex preferredIndex = this->completionModel()->index(0, 0);
