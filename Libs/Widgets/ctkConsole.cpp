@@ -538,11 +538,71 @@ void ctkConsolePrivate::updateCompleter()
     // Get the text between the current cursor position
     // and the start of the line
     QTextCursor text_cursor = this->textCursor();
-    text_cursor.setPosition(this->InteractivePosition, QTextCursor::KeepAnchor);
-    QString commandText = text_cursor.selectedText();
-    //commandText.remove("()");
+    while (!text_cursor.selectedText().contains(">>>"))
+      {
+      text_cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+      }
 
-    qDebug() << "\n------------------------------------\n------------------------------------\n";
+    QString commandText = text_cursor.selectedText();
+    qDebug() << "\n------------------------------------";
+    qDebug() << "this->Ps1" << this->Ps1;
+    qDebug() << "updateCompleter text:" << text_cursor.selectedText();
+
+    //commandText.remove("... ");
+    int pos_Ps2 = commandText.indexOf("... ")-1;
+    qDebug() << "pos_Ps2" << pos_Ps2;
+    while (pos_Ps2 > -1)
+      {
+      int number_deleted_char=5;
+      if (commandText.at(pos_Ps2-1) == QChar('\\') )
+        {
+        pos_Ps2--;
+        number_deleted_char++;
+        }
+      commandText.remove(pos_Ps2,number_deleted_char);
+      pos_Ps2 = commandText.indexOf("... ")-1;
+      }
+    qDebug() << "cmd text            :" << commandText;
+    commandText.remove(">>> ");
+    commandText.remove('\r');
+    //commandText.replace(QRegExp("\\s*$"), ""); // Remove trailing spaces ---- DOESN'T WORK ----
+
+    // Remove useless spaces
+//    int between_single_quote = 0;
+    int between_double_quote = 0;
+    if (commandText.contains(" "))
+      {
+      // For each char
+      for (int i=0; i<commandText.size();i++)
+        {
+        // Verify if you are between between_double_quote:"" //or between_single_quote:' '
+        if (commandText.at(i) == '"')
+          {
+          between_double_quote++;
+          }
+//        if (commandText.at(i) == '\'')
+//          {
+//          between_single_quote++;
+//          }
+
+        // If we are not between quote: Erase spaces
+        if (!(between_double_quote%2)) // || !(between_single_quote%2))
+          {
+          if (commandText.at(i) == ' ')
+            {
+            commandText.remove(i,1);
+            i--;
+            }
+          }
+        }
+      }
+
+    qDebug() << "cmd text            :" << commandText;
+
+    //text_cursor.setPosition(this->InteractivePosition, QTextCursor::KeepAnchor);
+    //commandText = text_cursor.selectedText();
+
+    qDebug() << "\n------------------------------------\n";
     qDebug() << "commandText" << commandText;
 
     // Call the completer to update the completion model
@@ -619,6 +679,8 @@ void ctkConsolePrivate::internalExecuteCommand()
   c.insertText("\n");
 
   this->InteractivePosition = this->documentEnd();
+
+  qDebug() << "command" << command;
 
   emit q->aboutToExecute(command);
   q->executeCommand(command);
