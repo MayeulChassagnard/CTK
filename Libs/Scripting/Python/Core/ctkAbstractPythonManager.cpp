@@ -416,7 +416,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
 //  Py_INCREF(object);
 
   PyObject* main_object = object;
-  QString instantiated_class_name = "something_random_djfdfkjnkvfjndsvfhgf";
+  QString instantiated_class_name = "_ctkAbstractPythonManager_autocomplete_tmp";
   QStringList results;
   QString line_code="";
 
@@ -429,7 +429,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
     QStringList tmpNames = pythonVariableName.split('.');
     for (int i = 0; i < tmpNames.size() && object; ++i)
       {
-      line_code.append(tmpNames[i]);
+      line_code.append(tmpNames[i]); // fill the line
       line_code.append(".");
 
       QByteArray tmpName = tmpNames.at(i).toLatin1();
@@ -484,7 +484,9 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
         Py_DECREF(prevObj);
 
         if (object)
+          {
           results = dir_object(object,appendParenthesis);
+          }
         }
 
       }
@@ -497,7 +499,9 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
     }
 
   if (PyObject_HasAttrString(main_object,instantiated_class_name.toLatin1().data()))
+    {
     PyObject_DelAttrString(main_object,instantiated_class_name.toLatin1().data());
+    }
 
   return results;
 }

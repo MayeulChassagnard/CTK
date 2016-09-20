@@ -283,7 +283,7 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
   for (int i = completion.length()-1; i >= 0; --i)
     {
     QChar c = completion.at(i);
-    if (c.isLetterOrNumber() || c == '.' || c == '_' || c == '(' || c == ')')
+    if (c.isLetterOrNumber() || c == '.' || c == '_' || c == '(' || c == ')' || c.isSymbol() || c.isPunct() || c.isSpace())
       {
       if (c == '(')
         {
