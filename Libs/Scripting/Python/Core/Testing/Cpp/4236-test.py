@@ -1,3 +1,15 @@
+
+class Maths(object):
+
+  MATHS_CLASS_MEMBER=0.1
+
+  def __init__(self,num):
+    self.math_instance_member = num
+
+  def maths_instance_method(self):
+    print("Hello from instance method")
+
+
 class Bar(object):
 
   BAR_CLASS_MEMBER = 1
@@ -7,6 +19,9 @@ class Bar(object):
 
   def bar_instance_method(self):
     print("Hello from instance method")
+
+  def bar_maths(self,num):
+    return Maths(num)
 
   @staticmethod
   def bar_class_method():
@@ -31,9 +46,6 @@ class Foo(object):
     print("Hello from class method")
 
 f = Foo()
-
-from pprint import pprint as pp
-pp(dir(f))
 
 class Object(object): pass
 
