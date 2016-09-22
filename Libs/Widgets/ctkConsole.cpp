@@ -645,9 +645,10 @@ void ctkConsolePrivate::updateCompleter()
 }
 
 //-----------------------------------------------------------------------------
-void ctkConsolePrivate::updateCommandBuffer()
+void ctkConsolePrivate::updateCommandBuffer(int commandLength)
 {
-  this->commandBuffer() = this->toPlainText().mid(this->InteractivePosition);
+  this->commandBuffer() =
+      this->toPlainText().mid(this->InteractivePosition, commandLength);
 }
 
 //-----------------------------------------------------------------------------
@@ -866,7 +867,7 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
   int cursorOffset = this->Completer->cursorOffset(shellLine);
   tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, cursorOffset);
   this->setTextCursor(tc);
-  this->updateCommandBuffer();
+  this->updateCommandBuffer(completion.length());
 }
 
 //-----------------------------------------------------------------------------
