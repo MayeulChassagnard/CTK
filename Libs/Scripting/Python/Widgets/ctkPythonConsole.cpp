@@ -317,9 +317,9 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     }
 
   QString module = "__main__";
-  qDebug() << "module" << module;
-  qDebug() << "lookup" << lookup;
-  qDebug() << "compareText" << compareText;
+  //qDebug() << "module" << module;
+  //qDebug() << "lookup" << lookup;
+  //qDebug() << "compareText" << compareText;
 
   // Lookup python names
   QStringList attrs;
@@ -332,7 +332,7 @@ void ctkPythonConsoleCompleter::updateCompletionModel(const QString& completion)
     attrs.removeDuplicates();
     }
 
-  qDebug() << "attrs" << attrs;
+  //qDebug() << "attrs" << attrs;
 
   // Initialize the completion model
   if (!attrs.isEmpty())

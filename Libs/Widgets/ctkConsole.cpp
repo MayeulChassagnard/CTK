@@ -547,13 +547,13 @@ void ctkConsolePrivate::updateCompleter()
       }
 
     QString commandText = text_cursor.selectedText();
-    qDebug() << "\n------------------------------------";
-    qDebug() << "this->Ps1" << this->Ps1;
-    qDebug() << "updateCompleter text:" << text_cursor.selectedText();
+    //qDebug() << "\n------------------------------------";
+    //qDebug() << "this->Ps1" << this->Ps1;
+    //qDebug() << "updateCompleter text:" << text_cursor.selectedText();
 
     //commandText.remove("... ");
     int pos_Ps2 = commandText.indexOf("... ")-1;
-    qDebug() << "pos_Ps2" << pos_Ps2;
+    //qDebug() << "pos_Ps2" << pos_Ps2;
     while (pos_Ps2 > -1)
       {
       int number_deleted_char=5;
@@ -565,7 +565,7 @@ void ctkConsolePrivate::updateCompleter()
       commandText.remove(pos_Ps2,number_deleted_char);
       pos_Ps2 = commandText.indexOf("... ")-1;
       }
-    qDebug() << "cmd text            :" << commandText;
+    //qDebug() << "cmd text            :" << commandText;
     commandText.remove(">>> ");
     commandText.remove('\r');
     //commandText.replace(QRegExp("\\s*$"), ""); // Remove trailing spaces ---- DOESN'T WORK ----
@@ -600,7 +600,7 @@ void ctkConsolePrivate::updateCompleter()
         }
       }
 
-    qDebug() << "cmd text            :" << commandText;
+    //qDebug() << "cmd text            :" << commandText;
 
     //text_cursor.setPosition(this->InteractivePosition, QTextCursor::KeepAnchor);
     //commandText = text_cursor.selectedText();
@@ -836,7 +836,7 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
     if (tc.selectedText()==")" || tc.selectedText()=="(")
       return;
 
-    qDebug() << "\n\n SELECTED TEXT" << tc.selectedText() << "\n\n";
+    //qDebug() << "\n\n SELECTED TEXT" << tc.selectedText() << "\n\n";
     tc = this->textCursor();
     tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor);
     tc.movePosition(QTextCursor::StartOfWord, QTextCursor::MoveAnchor);
@@ -853,7 +853,7 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
      *   appendParenthesis = false;
      *
      */
-    qDebug() << "\n\n SELECTED WORD" << tc.selectedText() << "\n\n";
+    //qDebug() << "\n\n SELECTED WORD" << tc.selectedText() << "\n\n";
     tc.insertText(completion);
     endOfCompletion.setPosition(tc.position());
     this->setTextCursor(tc);

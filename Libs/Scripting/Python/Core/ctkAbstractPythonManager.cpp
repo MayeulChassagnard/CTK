@@ -423,7 +423,7 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
   if(pythonVariableName.isEmpty())
     results = dir_object(object,appendParenthesis);
 
-  qDebug() << "\n*********************\n";
+  //qDebug() << "\n*********************\n";
   if (!pythonVariableName.isEmpty())
     {
     QStringList tmpNames = pythonVariableName.split('.');
@@ -433,22 +433,22 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
       line_code.append(".");
 
       QByteArray tmpName = tmpNames.at(i).toLatin1();
-      qDebug() << "tmpNames[" << i << "]" << tmpName.data();
+      //qDebug() << "tmpNames[" << i << "]" << tmpName.data();
 
       if (tmpName.contains("()"))
         {
         tmpNames[i].remove("()");
         tmpName = tmpNames.at(i).toLatin1();
-        qDebug() << "inside tmpNames ["<<i<<"]" << tmpName.data();
+        //qDebug() << "inside tmpNames ["<<i<<"]" << tmpName.data();
 
         // Attempt to instantiate the associated python class
-        qDebug() << dict << "-- IS DICT? --" << PyDict_Check(dict);
+        //qDebug() << dict << "-- IS DICT? --" << PyDict_Check(dict);
         PyObject* classToInstantiate;
         if (PyDict_Check(dict))
           classToInstantiate = PyDict_GetItemString(dict, tmpName.data());
         else
           classToInstantiate = PyObject_GetAttrString(object, tmpName.data());
-        qDebug() << "classToInstantiate" << classToInstantiate;
+        //qDebug() << "classToInstantiate" << classToInstantiate;
 
         if (classToInstantiate)
           {
@@ -470,16 +470,16 @@ QStringList ctkAbstractPythonManager::pythonAttributes(const QString& pythonVari
         PyObject* prevObj = object;
         if (PyDict_Check(object))
           {
-          qDebug() << "PyDict_Check object" << object;
+          //qDebug() << "PyDict_Check object" << object;
           object = PyDict_GetItemString(object, tmpName.data());
           Py_XINCREF(object);
           }
         else
           {
-          qDebug() << "else object" << object;
+          //qDebug() << "else object" << object;
           object = PyObject_GetAttrString(object, tmpName.data());
           dict = object;
-          qDebug() << "--> object" << object << "--> name" << tmpName.data();
+          //qDebug() << "--> object" << object << "--> name" << tmpName.data();
           }
         Py_DECREF(prevObj);
 
