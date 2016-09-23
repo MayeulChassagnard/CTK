@@ -151,6 +151,10 @@ public:
   /// changes can't be made to the text edit contents
   int InteractivePosition;
 
+  /// Stores the size of the message output area from the end of document
+  /// until the end of the command
+  int MessageOutputSize;
+
   /// Indicates if the last statement processes was incomplete.
   bool MultilineStatement;
 

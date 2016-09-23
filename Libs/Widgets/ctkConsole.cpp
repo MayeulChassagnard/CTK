@@ -94,6 +94,7 @@ ctkConsolePrivate::ctkConsolePrivate(ctkConsole& object) :
   Superclass(0),
   q_ptr(&object),
   InteractivePosition(documentEnd()),
+  MessageOutputSize(0),
   MultilineStatement(false), Ps1("$ "), Ps2("> "),
   EditorHints(ctkConsole::AutomaticIndentation | ctkConsole::RemoveTrailingSpaces),
   ScrollbarAtBottom(false),
@@ -615,6 +616,10 @@ void ctkConsolePrivate::updateCompleter()
     int savedInteractivePosition = this->InteractivePosition;
     int savedCursorPosition = this->textCursor().position();
 
+    //move the cursor at the end in case of a message displayed
+    QTextCursor tc = this->textCursor();
+    tc.setPosition(this->documentEnd());
+    this->setTextCursor(tc);
     // Call the completer to update the completion model
     this->Completer->updateCompletionModel(commandText);
 
@@ -647,8 +652,17 @@ void ctkConsolePrivate::updateCompleter()
 //-----------------------------------------------------------------------------
 void ctkConsolePrivate::updateCommandBuffer(int commandLength)
 {
+  qDebug() << "this->commandBuffer()" << this->commandBuffer();
+  qDebug() << "this->InteractivePosition" << this->InteractivePosition;
+  qDebug() << "this->MessageOutputSize" << this->MessageOutputSize;
+  if (commandLength == -1)
+    {
+    commandLength =
+        this->documentEnd() - this->InteractivePosition - this->MessageOutputSize;
+    }
   this->commandBuffer() =
       this->toPlainText().mid(this->InteractivePosition, commandLength);
+  qDebug() << "this->commandBuffer()" << this->commandBuffer();
 }
 
 //-----------------------------------------------------------------------------
@@ -714,6 +728,7 @@ void ctkConsolePrivate::internalExecuteCommand()
       }
     }
   this->promptForInput(indent);
+  this->MessageOutputSize = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -748,8 +763,13 @@ void ctkConsolePrivate::printString(const QString& text)
 void ctkConsolePrivate::printOutputMessage(const QString& text)
 {
   Q_Q(ctkConsole);
-
-  q->printMessage(text, q->outputTextColor());
+  QString textToPrint = text;
+  if (this->MessageOutputSize == 0)
+    {
+    textToPrint.prepend("\n");
+    }
+  this->MessageOutputSize += textToPrint.size();
+  q->printMessage(textToPrint, q->outputTextColor());
 }
 
 //----------------------------------------------------------------------------
@@ -757,6 +777,7 @@ void ctkConsolePrivate::printErrorMessage(const QString& text)
 {
   Q_Q(ctkConsole);
 
+  this->MessageOutputSize += text.size();
   q->printMessage(text, q->errorTextColor());
 }
 
@@ -825,6 +846,7 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
   QTextCursor endOfCompletion = this->textCursor();
   endOfCompletion.setPosition(tc.position());
   tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+  qDebug() << "completion" << completion;
   if (tc.selectedText()==".")
     {
     tc.insertText(QString(".") + completion);
@@ -867,7 +889,8 @@ void ctkConsolePrivate::insertCompletion(const QString& completion)
   int cursorOffset = this->Completer->cursorOffset(shellLine);
   tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, cursorOffset);
   this->setTextCursor(tc);
-  this->updateCommandBuffer(completion.length());
+  qDebug() << "completion before updateCmdBuf" << completion;
+  this->updateCommandBuffer(/*completion.length()*/);
 }
 
 //-----------------------------------------------------------------------------
