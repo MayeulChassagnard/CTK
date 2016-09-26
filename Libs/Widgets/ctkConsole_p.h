@@ -48,12 +48,17 @@ public:
 
   static bool isMoveLeftWithinLine(QKeyEvent* e, QTextCursor::MoveOperation &moveOperation, QTextCursor::MoveMode &moveMode);
 
+  static bool isMoveRighttWithinLine(QKeyEvent* e, QTextCursor::MoveOperation &moveOperation, QTextCursor::MoveMode &moveMode);
+
   virtual void keyPressEvent(QKeyEvent* e);
 
   void switchToUserInputTextColor(QTextCursor* textCursorToUpdate = 0);
   
   /// Returns the end of the document
   int documentEnd() const;
+
+  /// Returns the end of the commandLine
+  int commandEnd() const;
 
   virtual void focusOutEvent(QFocusEvent *e);
 
@@ -135,6 +140,10 @@ protected:
   /// Return true if the cursor position is in the history area
   /// false if it is after the InteractivePosition.
   bool isCursorInHistoryArea()const;
+
+  /// Return true if the cursor position is in the message output area
+  /// false if it is before the end of the commandLine.
+  bool isCursorInMessageOutputArea()const;
 
   /// Reimplemented to make sure there is no text added into the
   /// history logs.
